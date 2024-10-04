@@ -34,7 +34,7 @@ jobs:
       RT_REPO_VIRTUAL: ${{ vars.RT_REPO_NPM_VIRTUAL }} #'krishnam-npm-virtual'
       JOB_SUMMARY: false
       JFROG_CLI_LOG_LEVEL: ${{vars.JFROG_CLI_LOG_LEVEL}} # DEBUG, INFO, WARN, ERROR
-      BUILD_NAME: "example-reactapp"
+      BUILD_NAME: "example-react"
       BUILD_ID: "ga-${{ github.run_number }}"
     runs-on: ${{ matrix.os }}
     steps:
@@ -84,8 +84,8 @@ jobs:
           export JFROG_CLI_LOG_TIMESTAMP=DATE_AND_TIME
 
           jf npmc --global --repo-resolve ${{ env.RT_REPO_VIRTUAL}} --repo-deploy ${{ env.RT_REPO_VIRTUAL}} 
-          ls -lrta /home/runner/work/${{vars.GITHUB_REPOSITORY_ID}}
-          cd /home/runner/work/${{vars.GITHUB_REPOSITORY_ID}}/${{vars.GITHUB_REPOSITORY_ID}}
+          ls -lrta /home/runner/work/$GITHUB_REPOSITORY_ID
+          cd /home/runner/work/$GITHUB_REPOSITORY_ID/$GITHUB_REPOSITORY_ID
           pwd
 
       - name: prestep-summary
