@@ -94,6 +94,7 @@ jobs:
           pwd
           ls -lrta /home/runner/work/
 
+          echo "OIDC_PROVIDER_NAME = ${{ vars.JF_OIDC_PROVIDER_NAME }}"
           echo "GITHUB_REPOSITORY = $GITHUB_REPOSITORY"
           echo "GITHUB_SHA = $GITHUB_SHA"
           echo "GITHUB_REPOSITORY_ID = $GITHUB_REPOSITORY_ID"
