@@ -1,7 +1,7 @@
 # example-react
-- [![JF-CLI - NPM publish & BuildInfo](https://github.com/DayOne-Dev/example-react/actions/workflows/jfcli-npm.yml/badge.svg)](https://github.com/DayOne-Dev/example-react/actions/workflows/jfcli-npm.yml)
-- [![JF-CLI with Docker](https://github.com/DayOne-Dev/example-react/actions/workflows/jfcli-docker.yml/badge.svg)](https://github.com/DayOne-Dev/example-react/actions/workflows/jfcli-docker.yml)
 - [![JF-CLI - Query properties](https://github.com/DayOne-Dev/example-react/actions/workflows/jfcli-queryprop.yml/badge.svg)](https://github.com/DayOne-Dev/example-react/actions/workflows/jfcli-queryprop.yml)
+- [![JF-CLI - NPM publish & BuildInfo](https://github.com/DayOne-Dev/example-react/actions/workflows/jfcli-npm.yml/badge.svg)](https://github.com/DayOne-Dev/example-react/actions/workflows/jfcli-npm.yml)
+
 
 ### Prerequisite
 - Install JFrog CLI: [https://jfrog.com/getcli/](https://jfrog.com/getcli/
