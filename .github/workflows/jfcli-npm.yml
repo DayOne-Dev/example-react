@@ -50,8 +50,6 @@ jobs:
 
       - name: Clone VCS
         uses: actions/checkout@v4 # ref: https://github.com/actions/checkout
-      # - run: |
-      #     cd /home/runner/work/node-sample-reactapp/node-sample-reactapp
 
       # - name: NodeJs with ver = ${{ matrix.node }}
       #   uses: actions/setup-node@v4  # ref: https://github.com/actions/setup-node
@@ -86,7 +84,8 @@ jobs:
           export JFROG_CLI_LOG_TIMESTAMP=DATE_AND_TIME
 
           jf npmc --global --repo-resolve ${{ env.RT_REPO_VIRTUAL}} --repo-deploy ${{ env.RT_REPO_VIRTUAL}} 
-          ls -lrta /home/runner/work/node-sample-reactapp/node-sample-reactapp
+          ls -lrta /home/runner/work/${{vars.GITHUB_REPOSITORY_ID}}
+          cd /home/runner/work/${{vars.GITHUB_REPOSITORY_ID}}/${{vars.GITHUB_REPOSITORY_ID}}
           pwd
 
       - name: prestep-summary
