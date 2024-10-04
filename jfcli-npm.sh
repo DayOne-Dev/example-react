@@ -37,7 +37,7 @@ jf rt bp ${BUILD_NAME} ${BUILD_ID} --detailed-summary=true
 
 
 # set-props
-echo "\n\n**** Props: set ****\n\n"  # Thest properties were captured Artifacts >> repo path >> artifact >> 
+echo "\n\n**** Props: set ****\n\n"  # Thest properties were captured Artifacts >> repo path 'example-react-0.1.0.tgz' >> Properties
 jf rt sp "env=demo;org=ps;team=arch;pack_cat=webapp;ts=ts-${BUILD_ID}" --build="${BUILD_NAME}/${BUILD_ID}"
 
 sleep 10
