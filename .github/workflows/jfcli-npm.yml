@@ -51,6 +51,13 @@ jobs:
       - name: Clone VCS
         uses: actions/checkout@v4 # ref: https://github.com/actions/checkout
 
+      - name: list folder
+        run: |
+          pwd
+          ls -lrta /home/runner/work/
+
+          echo "GITHUB_REPOSITORY_ID = $GITHUB_REPOSITORY_ID"
+          
       # - name: NodeJs with ver = ${{ matrix.node }}
       #   uses: actions/setup-node@v4  # ref: https://github.com/actions/setup-node
       #   with:
@@ -84,9 +91,6 @@ jobs:
           export JFROG_CLI_LOG_TIMESTAMP=DATE_AND_TIME
 
           jf npmc --global --repo-resolve ${{ env.RT_REPO_VIRTUAL}} --repo-deploy ${{ env.RT_REPO_VIRTUAL}} 
-          ls -lrta /home/runner/work/$GITHUB_REPOSITORY_ID
-          cd /home/runner/work/$GITHUB_REPOSITORY_ID/$GITHUB_REPOSITORY_ID
-          pwd
 
       - name: prestep-summary
         run: |
