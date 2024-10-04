@@ -1,0 +1,134 @@
+name: JF-CLI - NPM publish & BuildInfo
+on:
+# TURN-OFF on every push 
+  push:
+    branches: 
+      - develop
+    paths-ignore: # When the below folders are checked-in, the GitHub Actions job will not start.
+    #  - '.github/**'
+      - 'node_modules/**'
+      - '.jfrog/**'
+#   pull_request:
+#     branches: [ main ]
+# issue_comment triggers this action on each comment on issues and pull requests
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened, synchronize]
+permissions:
+  actions: read # for detecting the Github Actions environment.
+  id-token: write # for creating OIDC tokens for signing.
+  packages: write # for uploading attestations.
+  contents: read
+  security-events: write # Required for uploading code scanning.
+jobs:
+  npmpackage:
+    name: NPM Package
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        node: [20]
+    env:  
+      JF_RT_URL: https://${{ vars.JF_NAME }}.jfrog.io
+      RT_REPO_VIRTUAL: ${{ vars.RT_REPO_NPM_VIRTUAL }} #'krishnam-npm-virtual'
+      JOB_SUMMARY: false
+      JFROG_CLI_LOG_LEVEL: ${{vars.JFROG_CLI_LOG_LEVEL}} # DEBUG, INFO, WARN, ERROR
+      BUILD_NAME: "example-reactapp"
+      BUILD_ID: "ga-${{ github.run_number }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      # Use the specific setup-cli branch. Ref https://github.com/marketplace/actions/setup-jfrog-cli
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        id: setup-cli
+        env:
+          JF_URL: ${{env.JF_RT_URL}}
+          JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          oidc-provider-name: ${{ vars.JF_OIDC_PROVIDER_NAME }}
+
+      - name: Clone VCS
+        uses: actions/checkout@v4 # ref: https://github.com/actions/checkout
+      # - run: |
+      #     cd /home/runner/work/node-sample-reactapp/node-sample-reactapp
+
+      # - name: NodeJs with ver = ${{ matrix.node }}
+      #   uses: actions/setup-node@v4  # ref: https://github.com/actions/setup-node
+      #   with:
+      #     node-version: ${{ matrix.node }}
+      #     cache: 'npm'
+      #     cache-dependency-path: 'package.json'
+      - name: Software version
+        run: |
+          # JFrog CLI version
+          jf --version
+          # Ping the server
+          jf rt ping
+          # NodeJS
+          node -v
+          npm -v
+          # Java
+          java -version
+          # MVN
+          mvn -version
+          # Docker
+          docker -v
+          # Python
+          python3 -V
+          pip3 -V
+          # jf config
+          jf config show
+
+      - name: Config jf with npm repos # ref: https://docs.jfrog-applications.jfrog.io/jfrog-applications/jfrog-cli/cli-for-jfrog-artifactory/package-managers-integration#setting-npm-repositories
+        run: |
+          export JFROG_CLI_LOG_LEVEL=${{ env.JFROG_CLI_LOG_LEVEL }}
+          export JFROG_CLI_LOG_TIMESTAMP=DATE_AND_TIME
+
+          jf npmc --global --repo-resolve ${{ env.RT_REPO_VIRTUAL}} --repo-deploy ${{ env.RT_REPO_VIRTUAL}} 
+          ls -lrta /home/runner/work/node-sample-reactapp/node-sample-reactapp
+          pwd
+
+      - name: prestep-summary
+        run: |
+          jfcliv=`jf -v`
+          nodeVer=`node -v`
+          npmVer=`node -v`
+          echo "# :frog: Prestep Summary :pushpin:" >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          echo " - Installed JFrog CLI [${jfcliv}](https://jfrog.com/getcli/) and [Node ${nodeVer} and NPM ${npmVer}](https://github.com/actions/setup-node) " >> $GITHUB_STEP_SUMMARY
+          echo " - Configured the JFrog Cli with SaaS Artifactory OIDC integration  " >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+# Package   
+      - name: npm Build   # ref: https://docs.jfrog-applications.jfrog.io/jfrog-applications/jfrog-cli/cli-for-jfrog-artifactory/package-managers-integration#installing-npm-packages
+        run: |
+          jf npm install --build-name=${{ env.BUILD_NAME}} --build-number=${{ env.BUILD_ID}} 
+      - name: npm publish
+        run: |
+          jf npm publish --build-name=${{ env.BUILD_NAME}} --build-number=${{ env.BUILD_ID}} 
+
+ # Build Info
+    # US Dept of Commerce: https://www.ntia.gov/page/software-bill-materials
+    # US Cyber Defence Agency: https://www.cisa.gov/sbom
+    #  NIST: https://www.nist.gov/itl/executive-order-14028-improving-nations-cybersecurity/software-security-supply-chains-software-1
+    # Centers for Medicare & Medicaid Services: https://security.cms.gov/learn/software-bill-materials-sbom
+      - name: build publish env vars  # Thest properties were captured in Builds >> example-react >> version >> Environment tab
+        run: |
+          export e_env="e_demo" e_org="e_ps" e_team="e_arch" 
+
+      - name: Collect env
+        run: jf rt bce ${{ env.BUILD_NAME}} ${{ env.BUILD_ID}} 
+ 
+      - name: Add VCS info
+        run: jf rt bag ${{ env.BUILD_NAME}} ${{ env.BUILD_ID}} 
+
+      - name: Build Publish   # ref: https://docs.jfrog-applications.jfrog.io/jfrog-applications/jfrog-cli/cli-command-summaries
+        run: jf rt bp ${{ env.BUILD_NAME}} ${{ env.BUILD_ID}} --detailed-summary=true
+
+# Set properties      
+      - name: Set properties 
+        run: |
+          ts="cmd.$(date '+%Y-%m-%d-%H-%M')" 
+          jf rt sp "env=demo;org=ps;team=arch;pack_cat=webapp;ts=${ts}" --build="${{ env.BUILD_NAME}}/${{ env.BUILD_ID}}"
+          

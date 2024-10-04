@@ -1,0 +1,108 @@
+name: JF-CLI - Query properties
+on:
+# TURN-OFF on every push 
+  push:
+    branches: 
+      - develop
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened, synchronize]
+permissions:
+  actions: read # for detecting the Github Actions environment.
+  id-token: write # for creating OIDC tokens for signing.
+  packages: write # for uploading attestations.
+  contents: read
+  security-events: write # Required for uploading code scanning.
+jobs:
+  npmpackage:
+    name: Queries
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+    env:  
+      JF_RT_URL: https://${{ vars.JF_NAME }}.jfrog.io
+      RT_REPO_NPM_VIRTUAL: 'krishnam-npm-virtual'
+      RT_REPO_MVN_VIRTUAL: 'krishnam-mvn-virtual'
+      JFROG_CLI_LOG_LEVEL: ${{vars.JFROG_CLI_LOG_LEVEL}} # DEBUG, INFO, WARN, ERROR
+    runs-on: ${{ matrix.os }}
+    steps:
+      # Use the specific setup-cli branch. Ref https://github.com/marketplace/actions/setup-jfrog-cli
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        id: setup-cli
+        env:
+          JF_URL: ${{env.JF_RT_URL}}
+          JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          oidc-provider-name: ${{ vars.JF_OIDC_PROVIDER_NAME }}
+
+      - name: Software version
+        run: |
+          # JFrog CLI version
+          jf --version
+          # Ping the server
+          jf rt ping
+          # NodeJS
+          node -v
+          npm -v
+          # Java
+          java -version
+          # MVN
+          mvn -version
+          # Docker
+          docker -v
+          # Python
+          python3 -V
+          pip3 -V
+          # jf config
+          jf config show
+          pwd
+
+      - name: Query properties by 'team=arch'
+        run: |
+          pwd
+
+          jf rt curl "/api/search/prop?repos=${{env.RT_REPO_NPM_VIRTUAL}}&team=arch" -o "QueryByTeam.json"
+
+          cat "QueryByTeam.json"
+
+          echo "# :frog: Query properties by 'team=arch' :mag:" >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          cat "QueryByTeam.json" >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+
+      - name: Query properties by 'team=arch' and 'env=demo'
+        run: |
+          jf rt curl "/api/search/prop?repos=${{env.RT_REPO_NPM_VIRTUAL}}&team=arch&env=demo" -o "QueryByTeamEnv.json"
+          cat "QueryByTeamEnv.json"
+
+          echo "# :frog: Query property by 'team=arch&env=demo' :mag:" >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          cat "QueryByTeamEnv.json" >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+
+      - name: Query properties by 'build.name=node-sample-reactapp-ga'
+        run: |
+          jf rt curl "/api/search/prop?repos=${{env.RT_REPO_NPM_VIRTUAL}}&build.name=node-sample-reactapp-ga" -o "QueryByNpmBuildName.json"
+          cat "QueryByNpmBuildName.json"
+
+          echo "# :frog: Query property by 'build.name=node-sample-reactapp-ga' :mag:" >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          cat "QueryByNpmBuildName.json" >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+
+      - name: Query properties by 'build.name=spring-petclinic-ga'
+        run: |
+          jf rt curl "/api/search/prop?repos=${{env.RT_REPO_MVN_VIRTUAL}}&build.name=spring-petclinic-ga" -o "QueryByMvnBuildName.json"
+          cat "QueryByMvnBuildName.json"
+
+          echo "# :frog: Query property by 'build.name=spring-petclinic-ga' :mag:" >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          cat "QueryByMvnBuildName.json" >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
