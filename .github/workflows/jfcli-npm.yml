@@ -53,17 +53,6 @@ jobs:
       - name: Clone VCS
         uses: actions/checkout@v4 # ref: https://github.com/actions/checkout
 
-      - name: list folder
-        run: |
-          pwd
-          ls -lrta /home/runner/work/
-
-          echo "GITHUB_REPOSITORY = $GITHUB_REPOSITORY"
-          echo "GITHUB_SHA = $GITHUB_SHA"
-          echo "GITHUB_REPOSITORY_ID = $GITHUB_REPOSITORY_ID"
-
-          cd /home/runner/work/example-react/example-react
-          
       # - name: NodeJs with ver = ${{ matrix.node }}
       #   uses: actions/setup-node@v4  # ref: https://github.com/actions/setup-node
       #   with:
@@ -96,9 +85,21 @@ jobs:
           export JFROG_CLI_LOG_LEVEL=${{ env.JFROG_CLI_LOG_LEVEL }}
           export JFROG_CLI_LOG_TIMESTAMP=DATE_AND_TIME
           # jf npmc --global --server-id-resolve ${{ vars.JF_NAME }} --server-id-deploy ${{ vars.JF_NAME }} --repo-resolve ${{ env.RT_REPO_VIRTUAL}} --repo-deploy ${{ env.RT_REPO_VIRTUAL}} 
+          
           jf npmc --global --repo-resolve ${{ env.RT_REPO_VIRTUAL}} --repo-deploy ${{ env.RT_REPO_VIRTUAL}} 
           pwd
 
+      - name: list folder
+        run: |
+          pwd
+          ls -lrta /home/runner/work/
+
+          echo "GITHUB_REPOSITORY = $GITHUB_REPOSITORY"
+          echo "GITHUB_SHA = $GITHUB_SHA"
+          echo "GITHUB_REPOSITORY_ID = $GITHUB_REPOSITORY_ID"
+
+          cd /home/runner/work/example-react/example-react
+          
       - name: prestep-summary
         run: |
           jfcliv=`jf -v`
