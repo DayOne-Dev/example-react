@@ -34,7 +34,7 @@ jobs:
       RT_REPO_VIRTUAL: ${{ vars.RT_REPO_NPM_VIRTUAL }} #'krishnam-npm-virtual'
       JOB_SUMMARY: false
       JFROG_CLI_LOG_LEVEL: ${{vars.JFROG_CLI_LOG_LEVEL}} # DEBUG, INFO, WARN, ERROR
-      BUILD_NAME: "example-react"
+      BUILD_NAME: "example-reactJs"
       BUILD_ID: "ga-${{ github.run_number }}"
     runs-on: ${{ matrix.os }}
     steps:
@@ -99,7 +99,7 @@ jobs:
           echo "GITHUB_SHA = $GITHUB_SHA"
           echo "GITHUB_REPOSITORY_ID = $GITHUB_REPOSITORY_ID"
 
-          cd /home/runner/work/example-react/example-react
+          cd /home/runner/work/example-reactJs/example-reactJs
           
       - name: prestep-summary
         run: |
@@ -125,7 +125,7 @@ jobs:
     # US Cyber Defence Agency: https://www.cisa.gov/sbom
     #  NIST: https://www.nist.gov/itl/executive-order-14028-improving-nations-cybersecurity/software-security-supply-chains-software-1
     # Centers for Medicare & Medicaid Services: https://security.cms.gov/learn/software-bill-materials-sbom
-      - name: build publish env vars  # Thest properties were captured in Builds >> example-react >> version >> Environment tab
+      - name: build publish env vars  # Thest properties were captured in Builds >> example-reactJs >> version >> Environment tab
         run: |
           export e_env="e_demo" e_org="e_ps" e_team="e_arch" 
 
@@ -139,7 +139,7 @@ jobs:
         run: jf rt bp ${{ env.BUILD_NAME}} ${{ env.BUILD_ID}} --detailed-summary=true
 
 # Set properties      
-      - name: Set properties # Thest properties were captured Artifacts >> repo path 'example-react-0.1.0.tgz' >> Properties
+      - name: Set properties # Thest properties were captured Artifacts >> repo path 'example-reactJs-0.1.0.tgz' >> Properties
         run: |
           ts="cmd.$(date '+%Y-%m-%d-%H-%M')" 
           jf rt sp "env=demo;org=ps;team=arch;pack_cat=webapp;ts=${ts}" --build="${{ env.BUILD_NAME}}/${{ env.BUILD_ID}}"
