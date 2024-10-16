@@ -39,7 +39,7 @@ jobs:
       DOCKER_BUILDX_PLATFORMS: 'linux/amd64,linux/arm64'
       JOB_SUMMARY: false
       JFROG_CLI_LOG_LEVEL: DEBUG # DEBUG, INFO, WARN, ERROR
-      BUILD_NAME: "example-reactJs"
+      BUILD_NAME: "example-reactjs"
       BUILD_ID: "ga-npm-dkr-${{ github.run_number }}"
       DOCKER_METADATA_JSON: 'metadata.json'
     runs-on: ${{ matrix.os }}

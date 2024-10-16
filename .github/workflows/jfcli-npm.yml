@@ -34,7 +34,7 @@ jobs:
       RT_REPO_VIRTUAL: ${{ vars.RT_REPO_NPM_VIRTUAL }} #'krishnam-npm-virtual'
       JOB_SUMMARY: false
       JFROG_CLI_LOG_LEVEL: ${{vars.JFROG_CLI_LOG_LEVEL}} # DEBUG, INFO, WARN, ERROR
-      BUILD_NAME: "example-reactJs"
+      BUILD_NAME: "example-reactjs"
       BUILD_ID: "ga-npm-${{ github.run_number }}"
     runs-on: ${{ matrix.os }}
     steps:
