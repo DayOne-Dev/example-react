@@ -1,6 +1,11 @@
 # example-react
-- [![JF-CLI - Query properties](https://github.com/DayOne-Dev/example-react/actions/workflows/jfcli-queryprop.yml/badge.svg)](https://github.com/DayOne-Dev/example-react/actions/workflows/jfcli-queryprop.yml)
-- [![JF-CLI - NPM publish & BuildInfo](https://github.com/DayOne-Dev/example-react/actions/workflows/jfcli-npm.yml/badge.svg)](https://github.com/DayOne-Dev/example-react/actions/workflows/jfcli-npm.yml)
+
+ CI/CD | Description | Code | [youtube.com/@DayOneDev](https://youtube.com/@DayOneDev) |
+| ------------- |:-------------:| -------------:| -------------:|
+| [GitHub Actions](https://github.com/DayOne-Dev/example-reactJs/actions/workflows/jfcli-npm.yml) | [JF-CLI](https://jfrog.com/getcli/) build with NPM | [![JF-CLI - NPM publish & BuildInfo](https://github.com/DayOne-Dev/example-reactJs/actions/workflows/jfcli-npm.yml/badge.svg)](https://github.com/DayOne-Dev/example-reactJs/actions/workflows/jfcli-npm.yml) | Not Yet | 
+| [GitHub Actions](https://github.com/DayOne-Dev/example-reactJs/actions/workflows/jfcli-npm-xray.yml) | [JF-CLI](https://jfrog.com/getcli/) to Query properties | [[![JF-CLI - Query properties](https://github.com/DayOne-Dev/example-reactJs/actions/workflows/jfcli-queryprop.yml/badge.svg)](https://github.com/DayOne-Dev/example-reactJs/actions/workflows/jfcli-queryprop.yml)| Not Yet | 
+| [GitHub Actions](https://github.com/DayOne-Dev/example-reactJs/blob/develop/.github/workflows/jfcli-queryprop.yml) | [JF-CLI](https://jfrog.com/getcli/) build with NPM + Xray | [![JF-CLI with NPM + Xray](https://github.com/DayOne-Dev/example-reactJs/blob/develop/.github/workflows/jfcli-queryprop.yml/badge.svg)](https://github.com/DayOne-Dev/example-reactJs/blob/develop/.github/workflows/jfcli-queryprop.yml) | Not Yet | 
+
 
 
 ### Prerequisite

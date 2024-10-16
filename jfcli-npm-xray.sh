@@ -2,6 +2,9 @@ clear
 # TOKEN SETUP
 # jf c add --user=krishnam --interactive=true --url=https://psazuse.jfrog.io --overwrite=true 
 
+# clean
+rm -rf package-lock.json && rm -rf .jfrog && rm -rf temp
+
 # Setting variables
 export JF_RT_URL="https://psazuse.jfrog.io" JFROG_NAME="psazuse" RT_REPO_VIRTUAL="krishnam-npm-virtual"  JFROG_CLI_LOG_LEVEL="DEBUG" # JF_ACCESS_TOKEN="<GET_YOUR_OWN_KEY>"
 export  BUILD_NAME="example-react-xray" BUILD_ID="cmd.$(date '+%Y-%m-%d-%H-%M')" 
@@ -22,27 +25,35 @@ jf npm install --build-name=${BUILD_NAME} --build-number=${BUILD_ID}
 # npm:publish
 jf npm publish --build-name=${BUILD_NAME} --build-number=${BUILD_ID}
 
-## [Xray] scan packages
-echo "\n\n**** JF: scan ****"
-jf scan . --extended-table=true --format=simple-json 
+# ## [Xray] scan packages
+# echo "\n\n**** JF: scan ****"
+# jf scan . --extended-table=true --format=simple-json 
 
 
-echo "\n\n**** Build Info ****\n\n"
-# build: bce:build-collect-env 
-jf rt bce ${BUILD_NAME} ${BUILD_ID}
-## build: bag:build-add-git
-jf rt bag ${BUILD_NAME} ${BUILD_ID}
-# Build:publish
-jf rt bp ${BUILD_NAME} ${BUILD_ID} --detailed-summary=true
+# echo "\n\n**** Build Info ****\n\n"
+# # build: bce:build-collect-env 
+# jf rt bce ${BUILD_NAME} ${BUILD_ID}
+# ## build: bag:build-add-git
+# jf rt bag ${BUILD_NAME} ${BUILD_ID}
+# # Build:publish
+# jf rt bp ${BUILD_NAME} ${BUILD_ID} --detailed-summary=true
 
-## [Xray]  bs:build-scan
-echo "\n\n**** Xray: Build Scan ****\n\n"
-jf bs ${BUILD_NAME} ${BUILD_ID} --rescan=true --format=table --extended-table=true --vuln=true --fail=false 
+# ## [Xray]  bs:build-scan
+# echo "\n\n**** Xray: Build Scan ****\n\n"
+# jf bs ${BUILD_NAME} ${BUILD_ID} --rescan=true --format=table --extended-table=true --vuln=true --fail=false 
+
+
+## XRAY sbom enrich    ref# https://docs.jfrog-applications.jfrog.io/jfrog-applications/jfrog-cli/cli-for-jfrog-security/enrich-your-sbom    
+echo "\n\n**** [XRAY] sbom enrich ****"
+find . -iname "*.cdx.json"  
+# jf se "build/resources/main/META-INF/sbom/application.cdx.json"
+
+
+
 
 
 # clean
-rm -rf package-lock.json
-rm -rf .jfrog
-rm -rf temp
+rm -rf package-lock.json && rm -rf .jfrog && rm -rf temp
+
 
 echo "\n\n**** DONE ****\n\n"
