@@ -79,6 +79,7 @@ jobs:
           pip3 -V
           # jf config
           jf config show
+          pwd 
           ls
 
       - name: Config jf with npm repos # ref: https://docs.jfrog-applications.jfrog.io/jfrog-applications/jfrog-cli/cli-for-jfrog-artifactory/package-managers-integration#setting-npm-repositories
