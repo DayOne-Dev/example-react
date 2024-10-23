@@ -7,13 +7,12 @@ WORKDIR /app
 # RUN npm config set cache temp
 
 # Copy package.json and package-lock.json to the container
+COPY . .
 COPY package*.json ./
-RUN npm install
+# RUN npm install
 
 # Install dependencies
 RUN npm install
-
-COPY . .
 
 EXPOSE 3000
 CMD [ "npm", "index.js"]
