@@ -4,7 +4,7 @@ on:
   push:
     branches: 
     #  - nobuildonpush
-      - main
+      - develop
   issue_comment:
     types: [created]
   pull_request_target:
@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         # The repository scanning will be triggered periodically on the following branches.
-        branch: [ "main" ]
+        branch: [ "develop"]
     # A pull request needs to be approved before Frogbot scans it. Any GitHub user who is associated with the
     # "frogbot" GitHub environment can approve the pull request to be scanned.
     environment: frogbot
