@@ -21,12 +21,56 @@ jobs:
     strategy:
       matrix:
         # The repository scanning will be triggered periodically on the following branches.
-        branch: [ "develop"]
+        branch: [ "develop" ]
     # A pull request needs to be approved before Frogbot scans it. Any GitHub user who is associated with the
     # "frogbot" GitHub environment can approve the pull request to be scanned.
     environment: frogbot
     steps:
+      - name: Software version
+        run: |
+          # Java
+          java --version
+          # Python
+          python3 -V
+          pip3 -V
+          # NodeJS
+          njs_v=`node -v`
+          echo "NODE_VER=${njs_v}" >> $GITHUB_ENV
+          npm_v=`npm -v`
+          echo "NPM_VER=${npm_v}" >> $GITHUB_ENV
+
+      - name: prestep-summary
+        run: |
+          echo "# :frog: Prestep Summary :pushpin:" >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          echo " - NodeJS Info: " >> $GITHUB_STEP_SUMMARY
+          echo "    - node: ${{ env.NODE_VER }} " >> $GITHUB_STEP_SUMMARY
+          echo "    - npm: ${{ env.NPM_VER }} " >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+
       - uses: actions/checkout@v4
+
+
+      - name: NodeJS upgrade
+        uses: actions/setup-node@v4  # ref: https://github.com/actions/setup-node
+        with:
+          node-version: 20
+
+      - name: After NodeJS upgrade
+        run: |
+          # NodeJS
+          njs_u_v=`node -v`
+          echo "NODE_U_VER=${njs_u_v}" >> $GITHUB_ENV
+          npm_u_v=`npm -v`
+          echo "NPM_U_VER=${npm_u_v}" >> $GITHUB_ENV
+
+      - name: prestep-summary update
+        run: |
+          echo " - After NodeJS upgrade: " >> $GITHUB_STEP_SUMMARY
+          echo "    - node: ${{ env.NODE_U_VER }} " >> $GITHUB_STEP_SUMMARY
+          echo "    - npm: ${{ env.NPM_U_VER }} " >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
 
       - uses: jfrog/frogbot@v2
         env:
@@ -84,7 +128,7 @@ jobs:
 
           # [Optional, default: "."]
           # Relative path to the root of the project in the Git repository. If left empty (without providing "." yourself as default), a recursive scan is triggered from the root directory of the project.
-          JF_WORKING_DIR: src
+          JF_WORKING_DIR: src/main/java
 
           # [Default: "*git*;*node_modules*;*target*;*venv*;*test*"]
           # List of exclusion patterns (utilizing wildcards) for excluding paths in the source code of the Git repository during SCA scans.
