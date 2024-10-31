@@ -1,0 +1,175 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: JFrog Security using JF-CLI
+on:
+# TURN-OFF on every push 
+  push:
+    branches: 
+    #  - nobuildonpush
+      - develop
+    paths-ignore: # When the below folders are checked-in, the GitHub Actions job will not start.
+      - 'node_modules/**'
+      - '.jfrog/**'
+#   pull_request:
+#     branches: [ main ]
+# issue_comment triggers this action on each comment on issues and pull requests
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened, synchronize]
+permissions:
+  actions: read # for detecting the Github Actions environment.
+  id-token: write # for creating OIDC tokens for signing.
+  packages: write # for uploading attestations.
+  contents: read
+  security-events: write # Required for uploading code scanning.
+jobs:
+  securityPackage:
+    name: Security Package
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        node: [20]
+    env:  
+      JF_RT_URL: https://${{ vars.JF_NAME }}.jfrog.io
+      RT_REPO_VIRTUAL: ${{ vars.RT_REPO_NPM_VIRTUAL }} #'krishnam-npm-virtual'
+      JOB_SUMMARY: false
+      JFROG_CLI_LOG_LEVEL: ${{vars.JFROG_CLI_LOG_LEVEL}} # DEBUG, INFO, WARN, ERROR
+      BUILD_NAME: "example-reactjs"
+      BUILD_ID: "ga-npm-sec-${{ github.run_number }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      # Use the specific setup-cli branch. Ref https://github.com/marketplace/actions/setup-jfrog-cli
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        id: setup-cli
+        env:
+          JF_URL: ${{env.JF_RT_URL}}
+          JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JFROG_CLI_BUILD_NAME: "${{ env.BUILD_NAME}}"
+          JFROG_CLI_BUILD_NUMBER: "${{ env.BUILD_ID}}"
+          JFROG_CLI_LOG_LEVEL: "${{ env.JFROG_CLI_LOG_LEVEL }}"
+        with:
+          version: 2.71.2
+          oidc-provider-name: ${{ vars.JF_OIDC_PROVIDER_NAME }}
+          disable-job-summary: ${{env.JOB_SUMMARY}}
+          disable-auto-build-publish: ${{env.JOB_SUMMARY}}
+
+      - name: Clone VCS
+        uses: actions/checkout@v4 # ref: https://github.com/actions/checkout
+
+      - name: Software version
+        run: |
+          # JFrog CLI version
+          jf --version
+          # Ping the server
+          jf rt ping
+          # Java
+          java -version
+          # MVN
+          mvn -version
+          # Docker
+          docker -v
+          # Python
+          python3 -V
+          pip3 -V
+          # jf config
+          jf config show
+      - name: Config jf with npm repos # ref: https://docs.jfrog-applications.jfrog.io/jfrog-applications/jfrog-cli/cli-for-jfrog-artifactory/package-managers-integration#setting-npm-repositories
+        run: |
+          jf npmc --global --repo-resolve ${{ env.RT_REPO_VIRTUAL}} --repo-deploy ${{ env.RT_REPO_VIRTUAL}} 
+
+          pwd
+          ls -lrta /home/runner/work/example-reactJs/example-reactJs
+          cd /home/runner/work/example-reactJs/example-reactJs
+
+      - name: prestep-summary
+        run: |
+          jfcliv=`jf -v`
+          nodeVer=`node -v`
+          npmVer=`node -v`
+          echo "# :frog: Prestep Summary :pushpin:" >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          echo " - Installed JFrog CLI [${jfcliv}](https://jfrog.com/getcli/) and [Node ${nodeVer} and NPM ${npmVer}](https://github.com/actions/setup-node) " >> $GITHUB_STEP_SUMMARY
+          echo " - Configured the JFrog Cli with SaaS Artifactory OIDC integration  " >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+
+      - name: CURATION 
+        run: |
+          jf ca 
+
+# Security info: https://docs.jfrog-applications.jfrog.io/jfrog-security-features/sast
+# SAST: https://docs.jfrog-applications.jfrog.io/jfrog-security-features/sast
+# Xray: https://docs.jfrog-applications.jfrog.io/jfrog-applications/jfrog-cli/cli-for-jfrog-security/scan-your-source-code
+# The --extended-table argument returns 3 additional columns (CVSS V2, CVSS V3, ISSUE ID) alongside the standard set SEVERITY, DIRECT DEPENDENCY, DIRECT DEPENDENCY VERSION, IMPACTED DEPENDENCY NAME, IMPACTED DEPENDENCY VERSION, FIXED VERSIONS, TYPE, CVE
+      - name: AUDIT - SAST
+        run: |
+          jf audit --npm --sast --extended-table
+
+      - name: AUDIT - Secrets Detection
+        run: |
+          jf audit --npm --secrets --extended-table
+
+      - name: AUDIT - Secrets Detection
+        run: |
+          jf audit --npm --secrets --extended-table
+
+      - name: AUDIT - Multiple Secrets types such as tokens, generic password, ssh keys, etc
+        run: |
+          jf audit --npm --secrets --validate-secrets --extended-table
+
+      - name: AUDIT - Software Composition Analysis and Contextual Analysis 
+        run: |
+          jf audit --npm --sca --extended-table
+
+      - name: AUDIT - Licenses 
+        run: |
+          jf audit --npm --licenses --extended-table
+
+      - name: AUDIT - Infrastructure as Code Vulnerabilities
+        run: |
+          jf audit --iac --extended-table
+
+      - name: npm Build and publish  # ref: https://docs.jfrog-applications.jfrog.io/jfrog-applications/jfrog-cli/cli-for-jfrog-artifactory/package-managers-integration#installing-npm-packages
+        run: |
+          jf npm install --build-name=${{ env.BUILD_NAME}} --build-number=${{ env.BUILD_ID}} 
+          jf npm publish --build-name=${{ env.BUILD_NAME}} --build-number=${{ env.BUILD_ID}} --detailed-summary --scan
+
+# Scan your Binaries: https://docs.jfrog-applications.jfrog.io/jfrog-applications/jfrog-cli/cli-for-jfrog-security/scan-your-binaries
+      - name: SCAN - Licenses
+        run: |
+          jf scan . --licenses --extended-table
+
+      - name: SCAN - Vulnerabilities
+        run: |
+          jf scan . --vuln --extended-table
+
+      - name: Build Publish
+        run: |
+          jf rt bp ${{ env.BUILD_NAME}} ${{ env.BUILD_ID}} --detailed-summary=true
+
+      - name: Query build info
+        env: 
+          BUILD_INFO_JSON: "BuildInfo-${{ env.BUILD_ID}}.json"
+        run: |
+           jf rt curl "/api/build/${{ env.BUILD_NAME}}/${{ env.BUILD_ID}}" -o $BUILD_INFO_JSON
+           cat $BUILD_INFO_JSON
+
+           sleep 20   # Sleeping for 20 seconds before executing the build publish seems to have resolved the build-scan issue. 
+
+      - name: Build Scan status # https://jfrog.com/help/r/xray-rest-apis/build-scan-status
+        run: |
+          # jf xr curl /api/v1/build/status -H 'Content-Type: application/json' -d '{"name": "example-reactjs", "number": "ga-npm-23" }'
+          jf xr curl /api/v1/build/status -H 'Content-Type: application/json' -d '{"name": "${{ env.BUILD_NAME}}", "number": "${{ env.BUILD_ID}}" }'
+
+      - name: Build Scan
+        run: |
+          jf bs ${{ env.BUILD_NAME}} ${{ env.BUILD_ID}} --vuln --rescan --extended-table
+
+      - name: Build Scan V2  # https://jfrog.com/help/r/xray-rest-apis/scan-build-v2
+        run: |
+          # jf xr curl /api/v2/ci/build -H 'Content-Type: application/json' -d '{"build_name": "example-reactjs", "build_number": "ga-npm-23","rescan":true }'
+          jf xr curl /api/v2/ci/build -H 'Content-Type: application/json' -d '{"build_name": "${{ env.BUILD_NAME}}", "build_number": "${{ env.BUILD_ID}}", "rescan":true }'
