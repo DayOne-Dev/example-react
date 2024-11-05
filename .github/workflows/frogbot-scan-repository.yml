@@ -63,13 +63,10 @@ jobs:
       #     echo "NODE_U_VER=${njs_u_v}" >> $GITHUB_ENV
       #     npm_u_v=`npm -v`
       #     echo "NPM_U_VER=${npm_u_v}" >> $GITHUB_ENV
-
-      - name: prestep-summary update
-        run: |
-          echo " - After NodeJS upgrade: " >> $GITHUB_STEP_SUMMARY
-          echo "    - node: ${{ env.NODE_U_VER }} " >> $GITHUB_STEP_SUMMARY
-          echo "    - npm: ${{ env.NPM_U_VER }} " >> $GITHUB_STEP_SUMMARY
-          echo " " >> $GITHUB_STEP_SUMMARY
+      #     echo " - After NodeJS upgrade: " >> $GITHUB_STEP_SUMMARY
+      #     echo "    - node: ${{ env.NODE_U_VER }} " >> $GITHUB_STEP_SUMMARY
+      #     echo "    - npm: ${{ env.NPM_U_VER }} " >> $GITHUB_STEP_SUMMARY
+      #     echo " " >> $GITHUB_STEP_SUMMARY
 
 #      - uses: jfrog/frogbot@v2
       - uses: jfrog/frogbot@5d9c42c30f1169d8be4ba5510b40e75ffcbbc2a9 
